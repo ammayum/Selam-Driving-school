@@ -28,6 +28,8 @@ import {
   PublicContactSettings,
   PublicVideoSettings,
   ReviewTestimonial,
+  BlogPost,
+  BlogPostPayload,
   ReviewTestimonialSubmission,
   Role,
   SeoUpdatePayload,
@@ -309,11 +311,28 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ items }),
     }),
-  submitReviewTestimonial: (payload: { author: string; email?: string; testimonial: string; rating: number }) =>
-    request<{ message: string; submission_id: number }>("/cms/pages/reviews/testimonials/submit", {
+  submitReviewTestimonial: (payload: { author: string; email?: string; testimonial: string; rating: number; photo?: File; photo_consent?: boolean }) => {
+    if (payload.photo) {
+      const form = new FormData();
+      form.set("author", payload.author);
+      form.set("email", payload.email || "");
+      form.set("testimonial", payload.testimonial);
+      form.set("rating", String(payload.rating));
+      form.set("photo", payload.photo);
+      form.set("photo_consent", payload.photo_consent ? "1" : "0");
+      return requestFormData<{ message: string; submission_id: number }>("/cms/pages/reviews/testimonials/submit", form);
+    }
+    return request<{ message: string; submission_id: number }>("/cms/pages/reviews/testimonials/submit", {
       method: "POST",
-      body: JSON.stringify(payload),
-    }),
+      body: JSON.stringify({ author: payload.author, email: payload.email, testimonial: payload.testimonial, rating: payload.rating }),
+    });
+  },
+  listBlogPosts: (admin = false) => request<BlogPost[]>(`/blog/posts${admin ? "?admin=1" : ""}`),
+  getBlogPost: (slug: string) => request<BlogPost>(`/blog/posts/${encodeURIComponent(slug)}`),
+  saveBlogPost: (payload: BlogPostPayload, id?: number) => request<BlogPost>(id ? `/blog/posts/${id}` : "/blog/posts", {
+    method: id ? "PUT" : "POST",
+    body: JSON.stringify(payload),
+  }),
   listReviewTestimonialSubmissions: (status?: "pending" | "approved" | "rejected") =>
     request<ReviewTestimonialSubmission[]>(
       `/cms/pages/reviews/testimonials/submissions${status ? `?status=${status}` : ""}`
