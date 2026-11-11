@@ -32,6 +32,9 @@ final class Content {
         'faq_booking'=>['How do I book driving lessons?','Choose a package, enter your preferred start date and pickup location, and submit a booking request. The school will contact you to confirm your instructor and lesson details.'],
         'faq_account'=>['Do I need an account to request a lesson?','No. Guest booking is available. Creating an account is optional and lets you use the student portal.'],
         'faq_payment'=>['How can I pay for lessons?','The booking form offers advance payment for two hours or payment directly to the instructor in class. The school confirms the payment and lesson arrangements.'],
+        'faq_types'=>['Does Selam Driving School offer manual and automatic lessons in Sheffield?','Selam Driving School lists both manual and automatic lesson options in Sheffield. Choose your preferred type when enquiring; availability is confirmed after your request.'],
+        'faq_prices'=>['Where can I find driving lesson prices in Sheffield?','Visit the Prices page to compare currently available lesson packages, hours and prices before booking.'],
+        'faq_confirmation'=>['Is my driving lesson confirmed when I submit a booking request?','No. Your request includes a preferred date and location. Selam Driving School will contact you to confirm your instructor and lesson arrangements.'],
         'lessons_manual'=>['Manual','Clutch control, hill starts, junctions, and exam route confidence.'],
         'lessons_automatic'=>['Automatic','Focus faster on road awareness and decision making.'],
         'lessons_intensive'=>['Intensive','Compact schedules for learners targeting a quick test date.'],
@@ -49,7 +52,7 @@ final class Content {
     }
     public static function display(string $slug): ?array { return self::page($slug)??self::defaults()[$slug]??null; }
     public static function faq(): array {
-        return array_map(fn($slug)=>['question'=>self::display($slug)['title'],'answer'=>self::display($slug)['body']],['faq_booking','faq_account','faq_payment']);
+        return array_map(fn($slug)=>['question'=>self::display($slug)['title'],'answer'=>self::display($slug)['body']],['faq_booking','faq_account','faq_payment','faq_types','faq_prices','faq_confirmation']);
     }
     public static function page(string $slug,bool $admin=false): ?array { return Db::one('SELECT * FROM cms_pages WHERE slug=?'.($admin?'':' AND is_published=1'),[$slug]); }
     public static function repeatables(): array { $c=Config::group('cms_repeatables'); $v=[]; foreach(['trust_badges','highlights','services','steps'] as $k) $v[$k]=self::jsonList($c[$k]??'[]'); return $v; }
