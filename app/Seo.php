@@ -2,15 +2,15 @@
 declare(strict_types=1);
 final class Seo {
     public const PAGES = [
-        'home'=>['Learn Manual and Automatic Driving with Confidence','Professional instructors, fast booking, and a modern student portal to keep every lesson on track.'],
-        'about'=>['About Selam Driving School','We help learners in Sheffield pass confidently using structured lessons and supportive coaching.'],
-        'lessons'=>['Driving Lessons','Manual, automatic and intensive driving courses in Sheffield.'],
-        'prices'=>['Prices','Transparent package pricing for Sheffield learners.'],
-        'instructors'=>['Our Instructors','Experienced and friendly instructors ready to support your journey.'],
-        'reviews'=>['Student Reviews','Feedback from learners.'],
-        'contact'=>['Contact','Call or message Selam Driving School in Sheffield.'],
-        'blog'=>['Learning Hub','Local driving tips, test readiness, and learner guides.'],
-        'book'=>['Book Lesson','Choose a package, your preferred start date, and payment option.'],
+        'home'=>['Manual & Automatic Driving Lessons in Sheffield','Book manual and automatic driving lessons in Sheffield with Selam Driving School. Explore packages, request a lesson and confirm availability.'],
+        'about'=>['About Our Sheffield Driving School','Learn about Selam Driving School in Sheffield, our approach to driving lessons and how to request a lesson with an instructor.'],
+        'lessons'=>['Manual & Automatic Driving Lessons in Sheffield','Explore manual and automatic driving lessons in Sheffield, including lesson options and how to request a booking with Selam Driving School.'],
+        'prices'=>['Driving Lesson Prices in Sheffield','Compare current manual and automatic driving lesson packages in Sheffield. Check lesson hours and prices before sending a booking request.'],
+        'instructors'=>['Driving Instructors in Sheffield','Meet the driving instructors listed by Selam Driving School in Sheffield and enquire about lesson availability.'],
+        'reviews'=>['Learner Reviews of Selam Driving School','Read published learner feedback about Selam Driving School in Sheffield and share your own experience.'],
+        'contact'=>['Contact Selam Driving School Sheffield','Contact Selam Driving School about driving lessons, manual or automatic availability and booking enquiries in Sheffield.'],
+        'blog'=>['Sheffield Driving Lessons Learning Hub','Explore driving lesson guidance, learner tips and preparation resources from Selam Driving School in Sheffield.'],
+        'book'=>['Book Driving Lessons in Sheffield','Request driving lessons in Sheffield with Selam Driving School. Choose a package and preferred start date, then await confirmation.'],
     ];
     public const FAQ = [
         ['question'=>'How do I book driving lessons?','answer'=>'Choose a package, enter your preferred start date and pickup location, and submit a booking request. The school will contact you to confirm your instructor and lesson details.'],
@@ -23,12 +23,12 @@ final class Seo {
         $exists=($p!==null||$fallback!==null||$private) && (!isset(Content::SECTIONS[$slug]) && !isset(PublicCopy::TEXT[$slug]) || in_array($slug,['login','signup'],true));
         $title=($p['meta_title']??'')?:$p['title']??$fallback[0]??($private?ucfirst(explode('/',$slug)[0]):'Page not found');
         if(!str_contains($title,'Selam')) $title.=' | Selam Driving School';
-        $description=($p['meta_description']??'')?:$p['body']??$fallback[1]??'Selam Driving School account portal.';
+        $description=($p['meta_description']??'')?:($fallback[1]??($p['body']??'Selam Driving School account portal.'));
         $canonical=rtrim(env('APP_URL'),'/').($path==='/'?'/':'/'.trim($path,'/'));
         $graph=[];
         if(!$private && $exists) {
             $base=rtrim(env('APP_URL'),'/'); $contact=Api::publicSettings('contact');
-            $business=['@type'=>['LocalBusiness','EducationalOrganization'],'@id'=>$base.'/#school','name'=>'Selam Driving School','url'=>$base.'/','areaServed'=>['@type'=>'City','name'=>'Sheffield']];
+            $business=['@type'=>'DrivingSchool','@id'=>$base.'/#school','name'=>'Selam Driving School','url'=>$base.'/','areaServed'=>['@type'=>'City','name'=>'Sheffield','containedInPlace'=>['@type'=>'AdministrativeArea','name'=>'South Yorkshire']]];
             if($contact['phone']) $business['telephone']=$contact['phone']; if($contact['email']) $business['email']=$contact['email']; if($contact['address']) $business['address']=$contact['address'];
             $graph[]=$business;
             $graph[]=['@type'=>'WebSite','@id'=>$base.'/#website','url'=>$base.'/','name'=>'Selam Driving School','publisher'=>['@id'=>$base.'/#school']];
