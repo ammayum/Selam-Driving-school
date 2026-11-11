@@ -33,6 +33,7 @@ def files_to_package() -> list[Path]:
         "bin/setup.php",
         "bin/create-admin.php",
         "bin/mail-worker.php",
+        "bin/preflight-production.php",
     ]
     for name in required:
         if not (ROOT / name).is_file():
