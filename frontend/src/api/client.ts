@@ -302,9 +302,9 @@ export const api = {
   getPublicAboutMediaSettings: () => request<PublicAboutMediaSettings>("/public/settings/about-media"),
   getPublicContactSettings: () => request<PublicContactSettings>("/public/settings/contact"),
   getHomeRepeatables: () => request<HomeRepeatables>("/cms/pages/home/repeatables"),
-  getReviewTestimonials: (minRating?: number) =>
+  getReviewTestimonials: (minRating?: number, managed = false) =>
     request<{ items: ReviewTestimonial[] }>(
-      `/cms/pages/reviews/testimonials${typeof minRating === "number" ? `?min_rating=${minRating}` : ""}`
+      `/cms/pages/reviews/testimonials${managed ? "?managed=1" : typeof minRating === "number" ? `?min_rating=${minRating}` : ""}`
     ),
   updateReviewTestimonials: (items: ReviewTestimonial[]) =>
     request<{ items: ReviewTestimonial[] }>("/cms/pages/reviews/testimonials", {
