@@ -4,7 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { api, resolveApiUrl } from "../../api/client";
 import { Seo } from "../../components/Seo";
-import { User } from "../../types";
+import { BlogPost, ReviewTestimonial, User } from "../../types";
+import { Link, useParams } from "react-router-dom";
 import { BasicCmsPage } from "./HomePage";
 import { usePublicAboutMediaSettings } from "./usePublicAboutMediaSettings";
 import { usePublicContactSettings } from "./usePublicContactSettings";
@@ -190,9 +191,10 @@ export function InstructorsPage() {
 
 export function ReviewsPage() {
   const page = useCmsPage("reviews");
-  const [testimonials, setTestimonials] = useState<{ author: string; testimonial: string; rating: number }[]>([]);
+  const [testimonials, setTestimonials] = useState<ReviewTestimonial[]>([]);
   const [minRating, setMinRating] = useState<"all" | number>("all");
   const [submitStatus, setSubmitStatus] = useState("");
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
 
   useEffect(() => {
     const filter = minRating === "all" ? undefined : minRating;
@@ -203,15 +205,24 @@ export function ReviewsPage() {
     event.preventDefault();
     const formEl = event.currentTarget;
     const form = new FormData(formEl);
+    const candidate = form.get("photo");
+    const file = candidate instanceof File && candidate.size > 0 ? candidate : undefined;
+    if (file && (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024)) {
+      setSubmitStatus("Photo must be a JPEG, PNG or WebP image under 5 MB.");
+      return;
+    }
     try {
       const res = await api.submitReviewTestimonial({
         author: String(form.get("author") || "").trim(),
         email: String(form.get("email") || "").trim() || undefined,
         testimonial: String(form.get("testimonial") || "").trim(),
         rating: Number(form.get("rating") || 5),
+        photo: file,
+        photo_consent: form.get("photo_consent") === "on",
       });
       setSubmitStatus(res.message);
       formEl.reset();
+      setSelectedPhoto(null);
     } catch (error) {
       setSubmitStatus(error instanceof Error ? error.message : "Unable to submit testimonial");
     }
@@ -239,6 +250,7 @@ export function ReviewsPage() {
         ) : null}
         {testimonials.map((item, idx) => (
           <article className="card review-card" key={`${item.author}-${idx}`}>
+            {item.photo_url ? <img className="review-photo" src={resolveApiUrl(item.photo_url)} alt={`Photo accompanying a review by ${item.author}`} loading="lazy" /> : null}
             <p className="review-stars">{"★".repeat(Math.max(1, Math.min(5, item.rating)))}</p>
             <p className="review-quote">"{item.testimonial}"</p>
             <strong className="review-author">- {item.author}</strong>
@@ -262,6 +274,9 @@ export function ReviewsPage() {
           </select>
           <label><CmsText id="copy_reviews_your_testimonial">Your Testimonial</CmsText></label>
           <textarea name="testimonial" rows={4} required minLength={10} />
+          <label>Optional review photo (JPEG, PNG or WebP, maximum 5 MB)</label>
+          <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" onChange={(e) => setSelectedPhoto(e.target.files?.[0] || null)} />
+          {selectedPhoto ? <label className="media-consent"><input type="checkbox" name="photo_consent" required /> I own or have permission to share this photo and agree it may be shown publicly with my name and review after approval.</label> : null}
           <button className="btn btn-gold" type="submit"><CmsText id="copy_reviews_submit_testimonial">Submit Testimonial</CmsText></button>
         </form>
         <p>{submitStatus}</p>
@@ -291,12 +306,50 @@ export function ContactPage() {
 
 export function BlogPage() {
   const page = useCmsPage("blog");
-
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  useEffect(() => {
+    api.listBlogPosts().then(setPosts).catch(() => setPosts([]));
+  }, []);
   return (
     <section className="section container">
-      <Seo title={page?.meta_title || "Driving Blog Sheffield"} description={page?.meta_description || "Local driving tips, DVSA test readiness, and learner guides."} />
-      <h1>{page?.title || "Learning Hub"}</h1>
-      <p>{page?.body ?? "Publish SEO-focused articles here: local routes, test day tips, and learner success stories."}</p>
+      <Seo title={page?.meta_title || "Sheffield Driving Blog | Selam Driving School"} description={page?.meta_description || "Sheffield driving lesson guides, learner advice and local driving school updates."} />
+      <h1>{page?.title || "Driving Tips & Learning Hub"}</h1>
+      <p>{page?.body ?? "Explore Sheffield driving tips, learner advice and guides from Selam Driving School."}</p>
+      <div className="card-grid blog-grid">
+        {posts.length === 0 ? <p>No published articles yet. Visit again for new driving tips.</p> : null}
+        {posts.map((post) => (
+          <article className="card blog-card" key={post.id}>
+            {post.cover_image_url ? <img src={resolveApiUrl(post.cover_image_url)} alt={post.image_alt || post.title} loading="lazy" /> : null}
+            <h2><Link to={ "/blog/" + post.slug }>{post.title}</Link></h2>
+            <p>{post.excerpt}</p>
+            <Link to={ "/blog/" + post.slug } className="btn btn-black">Read Article</Link>
+          </article>
+        ))}
+      </div>
     </section>
+  );
+}
+
+export function BlogArticlePage() {
+  const { slug = "" } = useParams();
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    setPost(null);
+    setError("");
+    api.getBlogPost(slug).then(setPost).catch(() => setError("This article is not available."));
+  }, [slug]);
+  if (error) return <section className="section container"><h1>Article unavailable</h1><p>{error}</p><Link to="/blog">Return to learning hub</Link></section>;
+  if (!post) return <section className="section container"><p>Loading article...</p></section>;
+  return (
+    <article className="section container blog-article">
+      <Seo title={post.title + " | Selam Driving School"} description={post.excerpt} />
+      <Link to="/blog">All driving guides</Link>
+      <h1>{post.title}</h1>
+      {post.published_at ? <p><time dateTime={post.published_at}>{post.published_at.slice(0, 10)}</time></p> : null}
+      <p>{post.excerpt}</p>
+      {post.cover_image_url ? <img src={resolveApiUrl(post.cover_image_url)} alt={post.image_alt || post.title} /> : null}
+      <div className="blog-article-body">{post.body}</div>
+    </article>
   );
 }
