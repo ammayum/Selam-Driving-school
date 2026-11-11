@@ -1,0 +1,69 @@
+name: Production release readiness
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out merged candidate
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          extensions: mbstring, pdo_mysql, pdo_sqlite, gd, fileinfo, openssl
+          coverage: none
+
+      - name: PHP source syntax
+        run: |
+          set -e
+          for file in app/*.php public/*.php; do php -l "$file"; done
+
+      - name: Install production Composer dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: SEO and AEO regression tests
+        run: python3 tests/seo_aeo.py
+
+      - name: Blog and review photo tests
+        run: python3 tests/review_blog_media.py
+
+      - name: Existing application integration tests
+        run: python3 tests/integration.py
+
+      - name: Install Node.js for Vite
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Compile React production frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package deployable PHP release
+        run: python3 bin/package-production.py
+
+      - name: Verify archive checksum
+        working-directory: dist
+        run: sha256sum -c *.sha256
+
+      - name: Publish deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: selam-production-candidate
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 14

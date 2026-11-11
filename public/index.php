@@ -14,11 +14,15 @@ try {
     if(preg_match('~^/(?:api/)?media/([a-f0-9]{48}\.(?:jpg|png|webp))$~',$path,$m)&&$method==='GET') {
         $file=DATA_DIR.'/uploads/'.$m[1]; if(!is_file($file)) Http::fail(404,'Image not found'); header('Content-Type: '.(new finfo(FILEINFO_MIME_TYPE))->file($file)); header('Content-Disposition: inline; filename="'.$m[1].'"'); header('Cache-Control: public, max-age=86400'); header('Content-Security-Policy: sandbox'); readfile($file); exit;
     }
+    if($method==='GET' && preg_match('~^/(?:api/)?media/reviews/([1-9][0-9]*)$~',$path,$reviewMatch)) {
+        ReviewMedia::serve((int)$reviewMatch[1]);
+    }
     if(str_starts_with($path,'/api/')) {
         header('X-Robots-Tag: noindex, nofollow'); $route=rtrim(substr($path,4),'/');
         if(!in_array($method,['GET','POST','PUT','PATCH','DELETE'])) Http::fail(405,'Method not allowed');
         if($method!=='GET') Http::csrf();
-        $body=$route==='/media/upload-photo'?[]:($method==='GET'?[]:Http::body());
+        $isReviewMultipart=$method==='POST' && $route==='/cms/pages/reviews/testimonials/submit' && str_starts_with($_SERVER['CONTENT_TYPE']??'','multipart/form-data');
+        $body=$route==='/media/upload-photo'?[]:($isReviewMultipart?$_POST:($method==='GET'?[]:Http::body()));
         if($method==='GET'&&$route==='/seo') { $p=Http::text($_GET,'path',200); $meta=Seo::metadata($p); unset($meta['page']); Http::json($meta); }
         Http::json(Api::dispatch($method,$route,$body));
     }

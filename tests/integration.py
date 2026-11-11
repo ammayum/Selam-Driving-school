@@ -52,7 +52,7 @@ def run():
         base=f'http://127.0.0.1:{port}'
         env = dict(os.environ, APP_ENV='testing', APP_URL=base, APP_KEY='test-key-'+'x'*56,
             DB_DSN='sqlite:'+str(runtime/'test.sqlite'), APP_DATA_DIR=str(runtime/'data'),
-            APP_PRIVATE_DIR=str(runtime/'config'), MAIL_TRANSPORT='log')
+            APP_PRIVATE_DIR=str(runtime/'config'), MAIL_TRANSPORT='log', MAIL_SEND_IMMEDIATELY='false')
         subprocess.run(['php','tests/fixture.php'],cwd=ROOT,env=env,check=True,capture_output=True)
         log=open(runtime/'server.log','w')
         server=subprocess.Popen(['php','-S',f'127.0.0.1:{port}','-t','public','public/router.php'],cwd=ROOT,env=env,stdout=log,stderr=log)

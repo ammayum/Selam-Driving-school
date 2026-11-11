@@ -18,7 +18,7 @@ export function BookPage() {
   const [packages, setPackages] = useState<LessonPackage[]>([]);
   const [status, setStatus] = useState("");
   const [selectedPackageId, setSelectedPackageId] = useState(0);
-  const [lessonType, setLessonType] = useState<"manual" | "automatic">("manual");
+  const [lessonType, setLessonType] = useState<"manual" | "automatic">(searchParams.get("lesson_type") === "automatic" ? "automatic" : "manual");
 
   useEffect(() => {
     api
