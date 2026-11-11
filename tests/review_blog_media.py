@@ -145,7 +145,7 @@ def run():
             assert guest.headers["Content-Type"].startswith("image/jpeg")
             assert any(item.get("photo_url") for item in guest.call("/api/cms/pages/reviews/testimonials")["items"])
             # Published client reviews must not become editable CMS-curated entries.
-            assert guest.call("/api/cms/pages/reviews/testimonials?managed=1", expected=403)
+            assert guest.call("/api/cms/pages/reviews/testimonials?managed=1", expected=401)
             assert admin.call("/api/cms/pages/reviews/testimonials?managed=1")["items"] == []
 
             fields["photo_consent"] = "0"
