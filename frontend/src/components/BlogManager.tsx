@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { api, resolveApiUrl } from "../api/client";
 import { BlogPost, BlogPostPayload } from "../types";
@@ -59,7 +59,7 @@ export function BlogManager() {
     }
   }
 
-  async function save(event: React.FormEvent<HTMLFormElement>) {
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setStatus("");
