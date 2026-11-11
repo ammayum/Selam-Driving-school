@@ -15,6 +15,7 @@ import {
   AboutPage,
   AssignBookingPage,
   BlogPage,
+  BlogArticlePage,
   BookPage,
   ContactPage,
   HomePage,
@@ -52,6 +53,7 @@ export default function App() {
       <Route path="/signup" element={<SiteFrame><SignupPage /></SiteFrame>} />
       <Route path="/contact" element={<SiteFrame><ContactPage /></SiteFrame>} />
       <Route path="/blog" element={<SiteFrame><BlogPage /></SiteFrame>} />
+      <Route path="/blog/:slug" element={<SiteFrame><BlogArticlePage /></SiteFrame>} />
       <Route path="/login" element={<SiteFrame><LoginPage /></SiteFrame>} />
       <Route path="/change-password" element={<SiteFrame><ChangePasswordPage /></SiteFrame>} />
       <Route path="/portal" element={<SiteFrame><PortalPage /></SiteFrame>} />
