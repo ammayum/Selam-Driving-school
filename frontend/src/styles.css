@@ -736,6 +736,32 @@ th {
   margin-right: 6px;
 }
 
+/* Responsive media in approved reviews and published driving guides. */
+.review-photo,
+.blog-card img,
+.blog-cover,
+.blog-article > img,
+.media-preview img {
+  display: block;
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
+.review-photo,
+.blog-card img { aspect-ratio: 4 / 3; }
+.media-preview { max-width: 360px; margin: 0.75rem 0; }
+.media-preview img { max-height: 230px; object-fit: contain; }
+.media-consent { display: flex; gap: 0.5rem; align-items: start; }
+.media-consent input[type="checkbox"] { width: auto; flex: 0 0 auto; margin-top: 0.35rem; }
+.blog-card { display: flex; flex-direction: column; gap: 0.8rem; }
+.blog-card .btn { align-self: flex-start; margin-top: auto; }
+.blog-article { max-width: 860px; }
+.blog-article > img { max-height: 520px; object-fit: contain; margin: 1.5rem 0; }
+.blog-article-body { white-space: pre-wrap; line-height: 1.75; overflow-wrap: anywhere; }
+.blog-manager .form-grid fieldset { border: 0; padding: 0; margin: 0; }
+
 /* Search-friendly lesson guides: clear headings, direct booking calls and mobile links. */
 .lesson-guide { max-width: 1120px; }
 .lesson-guide .guide-intro { max-width: 800px; line-height: 1.75; }
