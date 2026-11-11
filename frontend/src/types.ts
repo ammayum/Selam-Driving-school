@@ -272,6 +272,25 @@ export type ReviewTestimonial = {
   author: string;
   testimonial: string;
   rating: number;
+  photo_url?: string | null;
+};
+
+export type BlogPost = {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  cover_image_url: string | null;
+  image_alt: string | null;
+  is_published: boolean | number;
+  created_at: string;
+  updated_at: string;
+  published_at: string | null;
+};
+
+export type BlogPostPayload = Pick<BlogPost, "slug" | "title" | "excerpt" | "body" | "cover_image_url" | "image_alt"> & {
+  is_published: boolean;
 };
 
 export type ReviewTestimonialSubmission = {
@@ -283,6 +302,7 @@ export type ReviewTestimonialSubmission = {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   reviewed_at: string | null;
+  photo_url?: string | null;
 };
 
 export type DatabaseConnection = {

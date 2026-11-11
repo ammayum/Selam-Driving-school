@@ -70,6 +70,7 @@ final class Api {
         if(str_starts_with($path,'/admin/database/')) return DatabaseAdmin::dispatch($method,substr($path,16),$b);
         if($path==='/admin/notification-templates') return NotificationTemplates::dispatch($method,$b);
         if($method==='GET' && str_starts_with($path,'/public/settings/')) return self::publicSettings(substr($path,17));
+        if(str_starts_with($path,'/blog/')) return Blog::dispatch($method,substr($path,5),$b);
         if(str_starts_with($path,'/cms/pages')) return Content::dispatch($method,substr($path,10),$b);
         if(str_starts_with($path,'/invites')) return self::invites($method,$path,$b);
         if($method==='POST' && $path==='/media/upload-photo') return self::upload();
