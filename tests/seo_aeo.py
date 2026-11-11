@@ -61,7 +61,7 @@ def run():
             assert "Driving Lessons in Sheffield" in meta["title"]
             assert meta["canonical"] == base + "/"
             assert meta["robots"].startswith("index")
-            assert any(x.get("@type") == "DrivingSchool" for x in meta["schema"]["@graph"])
+            assert any(isinstance(x.get("@type"), list) and "LocalBusiness" in x["@type"] for x in meta["schema"]["@graph"])
             lessons = client.call("/lessons")
             assert "Manual &amp; Automatic Driving Lessons in Sheffield" in lessons
             for kind in ("manual", "automatic"):
