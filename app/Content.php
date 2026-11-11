@@ -59,7 +59,11 @@ final class Content {
     private static function jsonList(string $s): array { $v=json_decode($s,true); return is_array($v)&&array_is_list($v)?array_values(array_filter($v,'is_array')):[]; }
     public static function reviews(): array {
         $c=Config::group('cms_repeatables'); $rows=self::jsonList($c['review_testimonials']??'[]');
-        foreach(Db::all("SELECT author,testimonial,rating FROM review_testimonial_submissions WHERE status='approved' ORDER BY id DESC") as $r) $rows[]=$r;
+        foreach(Db::all("SELECT id,author,testimonial,rating,photo_filename FROM review_testimonial_submissions WHERE status='approved' ORDER BY id DESC") as $r) {
+            $r['photo_url']=$r['photo_filename']?ReviewMedia::url((int)$r['id']):null;
+            unset($r['photo_filename']);
+            $rows[]=$r;
+        }
         return $rows;
     }
     public static function dispatch(string $method,string $path,array $b): mixed {
@@ -75,14 +79,60 @@ final class Content {
         }
         if($method==='GET'&&$path==='/home/repeatables') return self::repeatables();
         if($path==='/reviews/testimonials') {
-            if($method==='GET') { $rating=Http::integer($_GET['min_rating']??1,1,5,'min_rating'); return ['items'=>array_values(array_filter(self::reviews(),fn($r)=>(int)($r['rating']??0)>=$rating))]; }
-            if($method==='PUT') {Auth::requireRoles(['admin']); if(!is_array($b['items']??null)||count($b['items'])>500) Http::fail(422,'Invalid testimonials'); $rows=[]; foreach($b['items'] as $r) $rows[]=self::review($r); Config::save('cms_repeatables',['review_testimonials'=>json_encode($rows)]); return ['items'=>self::reviews()];}
+            if($method==='GET') {
+                if(($_GET['managed']??'')==='1') {
+                    Auth::requireRoles(['admin']);
+                    return ['items'=>self::jsonList(Config::group('cms_repeatables')['review_testimonials']??'[]')];
+                }
+                $rating=Http::integer($_GET['min_rating']??1,1,5,'min_rating');
+                return ['items'=>array_values(array_filter(self::reviews(),fn($r)=>(int)($r['rating']??0)>=$rating))];
+            }
+            if($method==='PUT') {Auth::requireRoles(['admin']); if(!is_array($b['items']??null)||count($b['items'])>500) Http::fail(422,'Invalid testimonials'); $rows=[]; foreach($b['items'] as $r) $rows[]=self::review($r,true); Config::save('cms_repeatables',['review_testimonials'=>json_encode($rows)]); return ['items'=>self::reviews()];}
         }
         if($method==='POST'&&$path==='/reviews/testimonials/submit') {
-            Http::limit('review',5); $r=self::review($b); $r['email']=empty($b['email'])?null:Http::email($b); $r['created_at']=now(); $id=Db::insert('review_testimonial_submissions',$r); return ['message'=>'Thank you. Your testimonial has been submitted for review.','submission_id'=>$id];
+            Http::limit('review',5);
+            $r=self::review($b);
+            $r['email']=empty($b['email'])?null:Http::email($b);
+            $f=$_FILES['photo']??null;
+            $photo=null;
+            if($f && ($f['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_NO_FILE) {
+                if(($b['photo_consent']??null)!=='1') Http::fail(422,'Consent is required to publish your photo');
+                $photo=ReviewMedia::store($f);
+            }
+            $r['photo_filename']=$photo;
+            $r['created_at']=now();
+            try { $id=Db::insert('review_testimonial_submissions',$r); }
+            catch(Throwable $error) { if($photo) ReviewMedia::remove($photo); throw $error; }
+            return ['message'=>'Thank you. Your testimonial and any photo have been submitted for review.','submission_id'=>$id];
         }
-        if($method==='GET'&&$path==='/reviews/testimonials/submissions') {Auth::requireRoles(['admin']); $s=isset($_GET['status'])?Http::choice($_GET['status'],['pending','approved','rejected'],'status'):null; return Db::all('SELECT * FROM review_testimonial_submissions'.($s?' WHERE status=?':'').' ORDER BY id DESC',$s?[$s]:[]);}
-        if($method==='PATCH'&&preg_match('~^/reviews/testimonials/submissions/(\d+)$~',$path,$m)) {Auth::requireRoles(['admin']); $id=(int)$m[1]; Api::row('review_testimonial_submissions',$id); Db::update('review_testimonial_submissions',$id,['status'=>Http::choice($b['status']??null,['approved','rejected'],'status'),'reviewed_at'=>now()]); Auth::audit('review.moderate','review',$id); return Api::row('review_testimonial_submissions',$id);}
+        if($method==='GET'&&$path==='/reviews/testimonials/submissions') {
+            Auth::requireRoles(['admin']);
+            $s=isset($_GET['status'])?Http::choice($_GET['status'],['pending','approved','rejected'],'status'):null;
+            $rows=Db::all('SELECT * FROM review_testimonial_submissions'.($s?' WHERE status=?':'').' ORDER BY id DESC',$s?[$s]:[]);
+            foreach($rows as &$item) {
+                $item['photo_url']=$item['photo_filename']?ReviewMedia::url((int)$item['id']):null;
+                unset($item['photo_filename']);
+            }
+            unset($item);
+            return $rows;
+        }
+        if($method==='PATCH'&&preg_match('~^/reviews/testimonials/submissions/(\d+)$~',$path,$m)) {
+            Auth::requireRoles(['admin']);
+            $id=(int)$m[1];
+            $record=Api::row('review_testimonial_submissions',$id);
+            $status=Http::choice($b['status']??null,['approved','rejected'],'status');
+            $changes=['status'=>$status,'reviewed_at'=>now()];
+            if($status==='rejected' && $record['photo_filename']) {
+                ReviewMedia::remove($record['photo_filename']);
+                $changes['photo_filename']=null;
+            }
+            Db::update('review_testimonial_submissions',$id,$changes);
+            Auth::audit('review.moderate','review',$id);
+            $result=Api::row('review_testimonial_submissions',$id);
+            $result['photo_url']=$result['photo_filename']?ReviewMedia::url($id):null;
+            unset($result['photo_filename']);
+            return $result;
+        }
         $admin=(Auth::user(false)['role']??null)==='admin';
         if($path===''&&$method==='GET') return Db::all('SELECT * FROM cms_pages'.($admin?'':' WHERE is_published=1').' ORDER BY id');
         if($path===''&&$method==='POST') {Auth::requireRoles(['admin']); $slug=Http::text($b,'slug',120); if(self::page($slug,true)) Http::fail(409,'Page exists'); return self::save($slug,$b);}
@@ -95,7 +145,16 @@ final class Content {
             return self::save($slug,$b,$p);
         } Http::fail(404,'Page not found');
     }
-    private static function review(array $b): array { $r=['author'=>Http::text($b,'author',120),'testimonial'=>Http::text($b,'testimonial',1500),'rating'=>Http::integer($b['rating']??null,1,5,'rating')]; if(mb_strlen($r['author'])<2||mb_strlen($r['testimonial'])<10) Http::fail(422,'Please provide your name and a longer testimonial'); return $r; }
+    private static function review(array $b,bool $managed=false): array {
+        $r=['author'=>Http::text($b,'author',120),'testimonial'=>Http::text($b,'testimonial',1500),'rating'=>Http::integer($b['rating']??null,1,5,'rating')];
+        if(mb_strlen($r['author'])<2||mb_strlen($r['testimonial'])<10) Http::fail(422,'Please provide your name and a longer testimonial');
+        if($managed) {
+            $image=Http::text($b,'photo_url',100,false);
+            if($image!=='' && !preg_match('~^/media/[a-f0-9]{48}\.(?:jpg|png|webp)$~',$image) && !preg_match('~^/media/reviews/[1-9][0-9]*$~',$image)) Http::fail(422,'Invalid testimonial photo');
+            $r['photo_url']=$image?:null;
+        }
+        return $r;
+    }
     private static function save(string $slug,array $b,?array $p=null): array {
         if(!preg_match('/^[a-z0-9_-]{1,120}$/',$slug)) Http::fail(422,'Invalid page slug'); $p??=self::page($slug,true); $d=['slug'=>$slug,'updated_at'=>now()];
         foreach(['title'=>200,'body'=>20000,'meta_title'=>255,'meta_description'=>500] as $k=>$max) if(isset($b[$k])) $d[$k]=Http::text($b,$k,$max,false);

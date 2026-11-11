@@ -20,7 +20,7 @@ final class Seo {
         ['question'=>'How can I pay for lessons?','answer'=>'The booking form offers advance payment for two hours or payment directly to the instructor in class. The school confirms the payment and lesson arrangements.'],
     ];
     public static function metadata(string $path): array {
-        $slug=$path==='/'?'home':trim($path,'/'); $p=Content::display($slug); $fallback=self::PAGES[$slug]??null;
+        $slug=$path==='/'?'home':trim($path,'/'); $article=str_starts_with($slug,'blog/')?Blog::published(substr($slug,5)):null; $p=$article?['title'=>$article['title'],'body'=>$article['body'],'meta_title'=>$article['title'],'meta_description'=>$article['excerpt']]:Content::display($slug); $fallback=self::PAGES[$slug]??null;
         $private=in_array($slug,['login','signup','portal','change-password','instructor/timeline','instructor/business-card'])||str_starts_with($slug,'assign/')||$slug==='admin'||str_starts_with($slug,'admin/');
         $exists=($p!==null||$fallback!==null||$private) && (!isset(Content::SECTIONS[$slug]) && !isset(PublicCopy::TEXT[$slug]) || in_array($slug,['login','signup'],true));
         $title=($p['meta_title']??'')?:$p['title']??$fallback[0]??($private?ucfirst(explode('/',$slug)[0]):'Page not found');
@@ -36,26 +36,36 @@ final class Seo {
             $graph[]=['@type'=>'WebSite','@id'=>$base.'/#website','url'=>$base.'/','name'=>'Selam Driving School','publisher'=>['@id'=>$base.'/#school']];
             $graph[]=['@type'=>'WebPage','@id'=>$canonical.'#webpage','url'=>$canonical,'name'=>$title,'description'=>mb_substr($description,0,300),'isPartOf'=>['@id'=>$base.'/#website']];
             if($path!=='/') $graph[]=['@type'=>'BreadcrumbList','itemListElement'=>[['@type'=>'ListItem','position'=>1,'name'=>'Home','item'=>$base.'/'],['@type'=>'ListItem','position'=>2,'name'=>$p['title']??$fallback[0]??$title,'item'=>$canonical]]];
+<<<<<<< HEAD
             $guide=LessonGuides::page($slug);
             if($guide) {
                 $graph[]=['@type'=>'Service','@id'=>$canonical.'#service','name'=>$guide['service_type'].' in Sheffield','serviceType'=>$guide['service_type'],'provider'=>['@id'=>$base.'/#school'],'areaServed'=>['@type'=>'City','name'=>'Sheffield'],'url'=>$canonical,'description'=>$description];
                 $graph[]=['@type'=>'FAQPage','@id'=>$canonical.'#faq','mainEntity'=>array_map(fn($f)=>['@type'=>'Question','name'=>$f['question'],'acceptedAnswer'=>['@type'=>'Answer','text'=>$f['answer']]],$guide['faqs'])];
+=======
+            if($article) {
+                $graph[]=['@type'=>'BlogPosting','@id'=>$canonical.'#article','headline'=>$article['title'],'description'=>$article['excerpt'],'datePublished'=>gmdate('c',strtotime($article['published_at'])),'dateModified'=>gmdate('c',strtotime($article['updated_at'])),'author'=>['@id'=>$base.'/#school'],'publisher'=>['@id'=>$base.'/#school'],'mainEntityOfPage'=>['@id'=>$canonical.'#webpage']] + ($article['cover_image_url']?['image'=>$base.$article['cover_image_url']]:[]);
+>>>>>>> origin/feature/review-blog-photo-uploads-20261111
             }
             if($slug==='home') $graph[]=['@type'=>'FAQPage','mainEntity'=>array_map(fn($f)=>['@type'=>'Question','name'=>$f['question'],'acceptedAnswer'=>['@type'=>'Answer','text'=>$f['answer']]],Content::faq())];
             if(in_array($slug,['home','prices'],true)) foreach(Db::all('SELECT * FROM lesson_packages WHERE is_active=1') as $pack) $graph[]=['@type'=>'Service','name'=>$pack['title'],'provider'=>['@id'=>$base.'/#school'],'offers'=>['@type'=>'Offer','price'=>$pack['price'],'priceCurrency'=>'GBP','url'=>$base.'/book']];
         }
+<<<<<<< HEAD
         $guideContent=LessonGuides::page($slug);
         return ['title'=>$title,'description'=>mb_substr(strip_tags($description),0,300),'canonical'=>$canonical,'robots'=>$private||!$exists||env('APP_INDEXING','true')!=='true'?'noindex, nofollow':'index, follow, max-image-preview:large','schema'=>['@context'=>'https://schema.org','@graph'=>$graph],'exists'=>$exists,'private'=>$private,'slug'=>$slug,'page'=>$p,'heading'=>$p['title']??$fallback[0]??$title,'body'=>$guideContent && (int)($p['id']??0)===0 ? $guideContent['intro'] : ($p['body']??$fallback[1]??''),'guide'=>LessonGuides::page($slug)];
+=======
+        return ['title'=>$title,'description'=>mb_substr(strip_tags($description),0,300),'canonical'=>$canonical,'robots'=>$private||!$exists||env('APP_INDEXING','true')!=='true'?'noindex, nofollow':'index, follow, max-image-preview:large','schema'=>['@context'=>'https://schema.org','@graph'=>$graph],'exists'=>$exists,'private'=>$private,'slug'=>$slug,'page'=>$p,'heading'=>$p['title']??$fallback[0]??$title,'body'=>$p['body']??$fallback[1]??'','article'=>$article];
+>>>>>>> origin/feature/review-blog-photo-uploads-20261111
     }
     public static function sitemap(): never {
-        header('Content-Type: application/xml; charset=utf-8'); $slugs=array_keys(self::PAGES); foreach(Db::all('SELECT slug FROM cms_pages WHERE is_published=1') as $p) if(!isset(Content::SECTIONS[$p['slug']]) && !isset(PublicCopy::TEXT[$p['slug']])) $slugs[]=$p['slug'];
+        header('Content-Type: application/xml; charset=utf-8'); $slugs=array_keys(self::PAGES); foreach(Db::all('SELECT slug FROM cms_pages WHERE is_published=1') as $p) if(!isset(Content::SECTIONS[$p['slug']]) && !isset(PublicCopy::TEXT[$p['slug']])) $slugs[]=$p['slug']; foreach(Blog::publishedList() as $post) $slugs[]='blog/'.$post['slug'];
         echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-        foreach(array_unique($slugs) as $slug) {if(in_array($slug,['login','signup','portal','admin','change-password'])) continue; echo '<url><loc>'.e(rtrim(env('APP_URL'),'/').($slug==='home'?'/':'/'.$slug)).'</loc>'; $p=Content::page($slug); if($p) echo '<lastmod>'.e(gmdate('c',strtotime($p['updated_at']))).'</lastmod>'; echo '</url>'; } echo '</urlset>'; exit;
+        foreach(array_unique($slugs) as $slug) {if(in_array($slug,['login','signup','portal','admin','change-password'])) continue; echo '<url><loc>'.e(rtrim(env('APP_URL'),'/').($slug==='home'?'/':'/'.$slug)).'</loc>'; $p=Content::page($slug); if($p) echo '<lastmod>'.e(gmdate('c',strtotime($p['updated_at']))).'</lastmod>'; if(str_starts_with($slug,'blog/')) { $post=Blog::published(substr($slug,5)); if($post) echo '<lastmod>'.e(gmdate('c',strtotime($post['updated_at']))).'</lastmod>'; } echo '</url>'; } echo '</urlset>'; exit;
     }
     public static function render(string $path,string $nonce): never {
         $meta=self::metadata($path); if(!$meta['exists']) http_response_code(404); if($meta['private']||!$meta['exists']) header('X-Robots-Tag: noindex, nofollow'); header('Content-Type: text/html; charset=utf-8'); header('Cache-Control: no-store');
         $manifestFile=ROOT.'/public/build/.vite/manifest.json'; $manifest=is_file($manifestFile)?json_decode(file_get_contents($manifestFile),true):[]; $entry=$manifest['index.html']??null;
         echo '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>'.e($meta['title']).'</title><meta name="description" content="'.e($meta['description']).'"><meta name="robots" content="'.e($meta['robots']).'"><link rel="canonical" href="'.e($meta['canonical']).'"><meta property="og:type" content="website"><meta property="og:title" content="'.e($meta['title']).'"><meta property="og:description" content="'.e($meta['description']).'"><meta property="og:url" content="'.e($meta['canonical']).'"><meta name="twitter:card" content="summary"><meta name="csrf-token" content="'.e($_SESSION['csrf']??'').'"><meta name="csp-nonce" content="'.e($nonce).'">';
+        if(!empty($meta['article']['cover_image_url'])) echo '<meta property="og:image" content="'.e(rtrim(env('APP_URL'),'/').$meta['article']['cover_image_url']).'"><meta name="twitter:card" content="summary_large_image">';
         echo '<link rel="icon" type="image/svg+xml" href="/build/favicon.svg">';
         foreach($entry['css']??[] as $css) echo '<link rel="stylesheet" href="/build/'.e($css).'">';
         echo '<script id="ld-json" type="application/ld+json" nonce="'.e($nonce).'">'.json_encode($meta['schema'],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_SLASHES).'</script></head><body><div id="root">';
@@ -80,7 +90,7 @@ final class Seo {
     }
     private static function body(array $m): void {
         echo '<header class="site-header"><div class="container nav-wrap"><a href="/" class="brand"><span class="brand-badge">S</span><span>Selam Driving School</span></a><nav class="menu">';
-        foreach(['Home'=>'/','About'=>'/about','Lessons'=>'/lessons','Prices'=>'/prices','Instructors'=>'/instructors','Reviews'=>'/reviews','Contact'=>'/contact','Portal'=>'/login','Book Lesson'=>'/book'] as $label=>$url) echo '<a href="'.$url.'">'.e(Content::display('copy_site_'.strtolower(str_replace(' ','_',$label)))['title']??$label).'</a>'; echo '</nav></div></header><main>';
+        foreach(['Home'=>'/','About'=>'/about','Lessons'=>'/lessons','Prices'=>'/prices','Instructors'=>'/instructors','Reviews'=>'/reviews','Blog'=>'/blog','Contact'=>'/contact','Portal'=>'/login','Book Lesson'=>'/book'] as $label=>$url) echo '<a href="'.$url.'">'.e(Content::display('copy_site_'.strtolower(str_replace(' ','_',$label)))['title']??$label).'</a>'; echo '</nav></div></header><main>';
         $slug=$m['slug'];
         if($slug==='home') {
             echo '<section class="hero"><div class="container hero-grid"><div><p class="eyebrow">Trusted in Sheffield</p><h1>'.e($m['heading']).'</h1><p>'.e($m['body']).'</p><div class="hero-actions"><a href="/book" class="btn btn-gold">Book Lesson</a></div></div><div class="hero-card hero-card-strong">'; self::copy('home_quick_book',3); echo '<a href="/book" class="btn btn-black">Send Booking Request</a></div></div></section>';
@@ -90,15 +100,30 @@ final class Seo {
         } elseif($guide=LessonGuides::page($slug)) {
             LessonGuides::render($guide,$m['heading'],$m['body']);
         } else {
+            if($slug==='blog') {
+                echo '<section class="section container"><h1>'.e($m['heading']).'</h1><p>'.e($m['body']).'</p><div class="card-grid">';
+                foreach(Blog::publishedList() as $post) {
+                    echo '<article class="card">';
+                    if($post['cover_image_url']) echo '<img class="blog-cover" src="'.e($post['cover_image_url']).'" alt="'.e($post['image_alt']?:$post['title']).'">';
+                    echo '<h2><a href="/blog/'.e($post['slug']).'">'.e($post['title']).'</a></h2><p>'.e($post['excerpt']).'</p><a href="/blog/'.e($post['slug']).'">Read article</a></article>';
+                }
+                echo '</div></section>';
+            } elseif(!empty($m['article'])) {
+                $post=$m['article'];
+                echo '<article class="section container blog-article"><a href="/blog">All driving guides</a><h1>'.e($post['title']).'</h1><p>'.e($post['excerpt']).'</p>';
+                if($post['cover_image_url']) echo '<img class="blog-cover" src="'.e($post['cover_image_url']).'" alt="'.e($post['image_alt']?:$post['title']).'">';
+                echo '<p>'.nl2br(e($post['body'])).'</p></article>';
+            } else {
             echo '<section class="section container"><h1>'.e($m['heading']).'</h1><p>'.nl2br(e($m['body'])).'</p>';
             if($slug==='prices') {echo '<div class="card-grid">';foreach(Db::all('SELECT * FROM lesson_packages WHERE is_active=1') as $p) echo '<article class="card"><h3>'.e($p['title']).'</h3><p>'.e(ucfirst($p['package_type'])).' - '.e($p['hours']).' hours</p><strong>GBP '.e($p['price']).'</strong></article>';echo '</div>';}
-            if($slug==='reviews') {foreach(Content::reviews() as $r) echo '<article class="card"><p>'.e($r['rating']).'/5</p><blockquote>'.e($r['testimonial']).'</blockquote><p>'.e($r['author']).'</p></article>';}
+            if($slug==='reviews') {foreach(Content::reviews() as $r) { echo '<article class="card">'; if(!empty($r['photo_url'])) echo '<img class="review-photo" src="'.e($r['photo_url']).'" alt="Photo accompanying a review by '.e($r['author']).'">'; echo '<p>'.e($r['rating']).'/5</p><blockquote>'.e($r['testimonial']).'</blockquote><p>'.e($r['author']).'</p></article>'; }}
             if($slug==='instructors') {foreach(Api::users('instructor') as $i) echo '<article class="card"><h2>'.e($i['full_name']).'</h2><p>Type: '.e($i['instructor_type']).'</p><p>'.e($i['email']).'</p><p>'.e($i['phone']).'</p></article>';}
             if($slug==='contact') { $c=Api::publicSettings('contact'); foreach(['phone','email','address','whatsapp'] as $k) echo '<article class="card"><h2>'.ucfirst($k).'</h2><p>'.e($c[$k]).'</p></article>'; }
             if($slug==='lessons') { echo '<div class="card-grid">'; foreach(['lessons_manual','lessons_automatic','lessons_intensive'] as $key) { echo '<article class="card">'; self::copy($key,3); if($key==='lessons_manual'||$key==='lessons_automatic') echo '<p><a href="/'.($key==='lessons_manual'?'manual':'automatic').'-driving-lessons-sheffield">Read our '.($key==='lessons_manual'?'manual':'automatic').' lesson guide</a></p>'; echo '</article>'; } echo '</div>'; }
             if($slug==='book') { self::copy('book_process',3); self::copy('book_request',3); }
             if($slug==='reviews') self::copy('reviews_submit',3);
             if(!$m['exists']) echo '<a href="/">Return home</a>'; echo '</section>';
+            }
         }
         echo '</main><footer class="site-footer"><div class="container">'; self::copy('site_footer',4); echo '<a href="/contact">Contact</a></div></footer>';
     }

@@ -4,6 +4,7 @@ import { api, request } from "../api/client";
 import { CmsPage } from "../types";
 import "./AdminControls.css";
 import { NotificationTemplateManager } from "./NotificationTemplateManager";
+import { BlogManager } from "./BlogManager";
 
 const groups = ["home", "about", "lessons", "prices", "instructors", "reviews", "book", "contact", "blog", "login", "signup", "site", "custom", "notifications"];
 function groupFor(slug: string) {
@@ -52,5 +53,6 @@ export function CmsManager({ onSaved, group = "home" }: { onSaved: () => void; g
       <label><input type="checkbox" checked={draft.is_published} onChange={e => setDraft({...draft,is_published:e.target.checked})} /> Published</label>
       <button type="submit" className="btn btn-gold">Save Content</button>
     </fieldset></form>}<p role="status">{status}</p></>}
+    {group === "blog" ? <BlogManager /> : null}
   </article>;
 }
