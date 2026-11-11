@@ -27,7 +27,7 @@ def photo_fixture(path: Path) -> bytes:
     return path.read_bytes()
 
 
-def multipart(fields, photo: bytes) -> tuple[bytes, str]:
+def multipart(fields, photo: bytes, field_name="photo") -> tuple[bytes, str]:
     boundary = "----SelamReviewImageTest"
     data = bytearray()
     for key, value in fields.items():
@@ -37,7 +37,7 @@ def multipart(fields, photo: bytes) -> tuple[bytes, str]:
         ).encode())
     data.extend((
         f"--{boundary}\r\n"
-        'Content-Disposition: form-data; name="photo"; filename="lesson.png"\r\n'
+        f'Content-Disposition: form-data; name="{field_name}"; filename="lesson.png"\r\n'
         'Content-Type: image/png\r\n\r\n'
     ).encode())
     data.extend(photo)
@@ -101,11 +101,24 @@ def run():
             article = guest.call("/blog/sheffield-driving-tips")
             assert "BlogPosting" in article and "Start with a safe routine" in article
             assert "sheffield-driving-tips" in guest.call("/sitemap.xml")
+            pic = photo_fixture(temp / "sample.png")
+            upload_raw, upload_type = multipart({}, pic, "file")
+            uploaded = admin.call(
+                "/api/media/upload-photo",
+                "POST", raw=upload_raw, headers={"Content-Type": upload_type},
+            )
+            assert uploaded["url"].startswith("/media/")
+            draft["cover_image_url"] = uploaded["url"]
+            draft["image_alt"] = "Learner driving practice photo"
+            published = admin.call("/api/blog/posts/" + str(created["id"]), "PUT", draft)
+            assert published["cover_image_url"] == uploaded["url"]
+            assert "og:image" in guest.call("/blog/sheffield-driving-tips")
+            guest.call("/api" + uploaded["url"])
+            assert guest.headers["Content-Type"].startswith("image/png")
             draft["cover_image_url"] = "https://untrusted.example/unsafe.svg"
             draft["image_alt"] = "Test"
             admin.call("/api/blog/posts/" + str(created["id"]), "PUT", draft, expected=422)
 
-            pic = photo_fixture(temp / "sample.png")
             fields = {
                 "author": "Test Learner", "email": "test@example.test",
                 "rating": "5", "testimonial": "A very helpful instructor and clear lessons.",
