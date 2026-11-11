@@ -35,6 +35,7 @@ export function SiteHeader() {
           <NavLink to="/prices"><CmsText id="copy_site_prices">Prices</CmsText></NavLink>
           <NavLink to="/instructors"><CmsText id="copy_site_instructors">Instructors</CmsText></NavLink>
           <NavLink to="/reviews"><CmsText id="copy_site_reviews">Reviews</CmsText></NavLink>
+          <NavLink to="/blog">Blog</NavLink>
           <NavLink to="/contact"><CmsText id="copy_site_contact">Contact</CmsText></NavLink>
           <NavLink to="/login"><CmsText id="copy_site_portal">Portal</CmsText></NavLink>
           <NavLink to="/book" className="cta-nav"><CmsText id="copy_site_book_lesson">Book Lesson</CmsText></NavLink>
