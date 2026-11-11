@@ -54,7 +54,7 @@ def run():
             home = client.call("/")
             assert "<h1>Manual &amp; Automatic Driving Lessons in Sheffield</h1>" in home
             assert 'application/ld+json' in home
-            assert '"DrivingSchool"' in home
+            assert '"LocalBusiness"' in home and '"EducationalOrganization"' in home
             assert "Does Selam Driving School offer manual and automatic lessons in Sheffield?" in home
             assert "Is my driving lesson confirmed when I submit a booking request?" in home
             meta = client.call("/api/seo?path=/")
