@@ -11,3 +11,5 @@
 /releases/
 **/__pycache__/
 /frontend/*.tsbuildinfo
+
+/dist/
