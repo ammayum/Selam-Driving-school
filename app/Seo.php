@@ -5,6 +5,8 @@ final class Seo {
         'home'=>['Manual & Automatic Driving Lessons in Sheffield','Book manual and automatic driving lessons in Sheffield with Selam Driving School. Explore packages, request a lesson and confirm availability.'],
         'about'=>['About Our Sheffield Driving School','Learn about Selam Driving School in Sheffield, our approach to driving lessons and how to request a lesson with an instructor.'],
         'lessons'=>['Manual & Automatic Driving Lessons in Sheffield','Explore manual and automatic driving lessons in Sheffield, including lesson options and how to request a booking with Selam Driving School.'],
+        'manual-driving-lessons-sheffield'=>['Manual Driving Lessons in Sheffield','Learn manual driving in Sheffield with practice covering clutch control, gears, junctions and hill starts. Compare packages and request a lesson with Selam Driving School.'],
+        'automatic-driving-lessons-sheffield'=>['Automatic Driving Lessons in Sheffield','Explore automatic driving lessons in Sheffield. Practise road awareness and safe decisions without a clutch. Compare Selam Driving School packages and enquire.'],
         'prices'=>['Driving Lesson Prices in Sheffield','Compare current manual and automatic driving lesson packages in Sheffield. Check lesson hours and prices before sending a booking request.'],
         'instructors'=>['Driving Instructors in Sheffield','Meet the driving instructors listed by Selam Driving School in Sheffield and enquire about lesson availability.'],
         'reviews'=>['Learner Reviews of Selam Driving School','Read published learner feedback about Selam Driving School in Sheffield and share your own experience.'],
@@ -28,16 +30,21 @@ final class Seo {
         $graph=[];
         if(!$private && $exists) {
             $base=rtrim(env('APP_URL'),'/'); $contact=Api::publicSettings('contact');
-            $business=['@type'=>'DrivingSchool','@id'=>$base.'/#school','name'=>'Selam Driving School','url'=>$base.'/','areaServed'=>['@type'=>'City','name'=>'Sheffield','containedInPlace'=>['@type'=>'AdministrativeArea','name'=>'South Yorkshire']]];
+            $business=['@type'=>['LocalBusiness','EducationalOrganization'],'@id'=>$base.'/#school','name'=>'Selam Driving School','url'=>$base.'/','areaServed'=>['@type'=>'City','name'=>'Sheffield','containedInPlace'=>['@type'=>'AdministrativeArea','name'=>'South Yorkshire']]];
             if($contact['phone']) $business['telephone']=$contact['phone']; if($contact['email']) $business['email']=$contact['email']; if($contact['address']) $business['address']=$contact['address'];
             $graph[]=$business;
             $graph[]=['@type'=>'WebSite','@id'=>$base.'/#website','url'=>$base.'/','name'=>'Selam Driving School','publisher'=>['@id'=>$base.'/#school']];
             $graph[]=['@type'=>'WebPage','@id'=>$canonical.'#webpage','url'=>$canonical,'name'=>$title,'description'=>mb_substr($description,0,300),'isPartOf'=>['@id'=>$base.'/#website']];
             if($path!=='/') $graph[]=['@type'=>'BreadcrumbList','itemListElement'=>[['@type'=>'ListItem','position'=>1,'name'=>'Home','item'=>$base.'/'],['@type'=>'ListItem','position'=>2,'name'=>$p['title']??$fallback[0]??$title,'item'=>$canonical]]];
+            $guide=LessonGuides::page($slug);
+            if($guide) {
+                $graph[]=['@type'=>'Service','@id'=>$canonical.'#service','name'=>$guide['service_type'].' in Sheffield','serviceType'=>$guide['service_type'],'provider'=>['@id'=>$base.'/#school'],'areaServed'=>['@type'=>'City','name'=>'Sheffield'],'url'=>$canonical,'description'=>$description];
+                $graph[]=['@type'=>'FAQPage','@id'=>$canonical.'#faq','mainEntity'=>array_map(fn($f)=>['@type'=>'Question','name'=>$f['question'],'acceptedAnswer'=>['@type'=>'Answer','text'=>$f['answer']]],$guide['faqs'])];
+            }
             if($slug==='home') $graph[]=['@type'=>'FAQPage','mainEntity'=>array_map(fn($f)=>['@type'=>'Question','name'=>$f['question'],'acceptedAnswer'=>['@type'=>'Answer','text'=>$f['answer']]],Content::faq())];
             if(in_array($slug,['home','prices'],true)) foreach(Db::all('SELECT * FROM lesson_packages WHERE is_active=1') as $pack) $graph[]=['@type'=>'Service','name'=>$pack['title'],'provider'=>['@id'=>$base.'/#school'],'offers'=>['@type'=>'Offer','price'=>$pack['price'],'priceCurrency'=>'GBP','url'=>$base.'/book']];
         }
-        return ['title'=>$title,'description'=>mb_substr(strip_tags($description),0,300),'canonical'=>$canonical,'robots'=>$private||!$exists||env('APP_INDEXING','true')!=='true'?'noindex, nofollow':'index, follow, max-image-preview:large','schema'=>['@context'=>'https://schema.org','@graph'=>$graph],'exists'=>$exists,'private'=>$private,'slug'=>$slug,'page'=>$p,'heading'=>$p['title']??$fallback[0]??$title,'body'=>$p['body']??$fallback[1]??''];
+        return ['title'=>$title,'description'=>mb_substr(strip_tags($description),0,300),'canonical'=>$canonical,'robots'=>$private||!$exists||env('APP_INDEXING','true')!=='true'?'noindex, nofollow':'index, follow, max-image-preview:large','schema'=>['@context'=>'https://schema.org','@graph'=>$graph],'exists'=>$exists,'private'=>$private,'slug'=>$slug,'page'=>$p,'heading'=>$p['title']??$fallback[0]??$title,'body'=>$p['body']??$fallback[1]??'','guide'=>LessonGuides::page($slug)];
     }
     public static function sitemap(): never {
         header('Content-Type: application/xml; charset=utf-8'); $slugs=array_keys(self::PAGES); foreach(Db::all('SELECT slug FROM cms_pages WHERE is_published=1') as $p) if(!isset(Content::SECTIONS[$p['slug']]) && !isset(PublicCopy::TEXT[$p['slug']])) $slugs[]=$p['slug'];
@@ -79,13 +86,15 @@ final class Seo {
             $r=Content::repeatables(); $defaults=[['title'=>'Automatic Lessons','text'=>'Build confidence faster with focused road awareness training.'],['title'=>'Manual Lessons','text'=>'Master clutch control, hill starts, and real Sheffield routes.'],['title'=>'Intensive Courses','text'=>'Condensed plans for learners targeting near-term test dates.']];
             foreach(['home_about'=>['Why Choose Selam','Supportive instruction and clear progress at every stage.'],'home_services'=>['Training Services','Choose the package that matches your confidence level and test timeline.'],'home_process'=>['How Booking Works','Choose a package, share your start date, and we contact you.'],'home_cta'=>['Start Your Driving Journey in Sheffield','Book your first lesson now or call us for quick guidance on the right course.']] as $key=>$fallback) { $p=Content::display($key); echo '<section class="section container"><h2>'.e($p['title']??$fallback[0]).'</h2><p>'.e($p['body']??$fallback[1]).'</p>'; if($key==='home_services') self::cards($r['services']); if($key==='home_process') self::cards($r['steps']); echo '</section>'; if($key==='home_process') { self::packages(); echo '<section class="section container">'; self::copy('home_instructors'); echo '</section>'; } }
             echo '<section class="section container">'; self::copy('booking_faq'); foreach(Content::faq() as $f) echo '<details><summary>'.e($f['question']).'</summary><p>'.e($f['answer']).'</p></details>';echo '</section>';
+        } elseif($guide=LessonGuides::page($slug)) {
+            LessonGuides::render($guide,$m['heading'],$m['body']);
         } else {
             echo '<section class="section container"><h1>'.e($m['heading']).'</h1><p>'.nl2br(e($m['body'])).'</p>';
             if($slug==='prices') {echo '<div class="card-grid">';foreach(Db::all('SELECT * FROM lesson_packages WHERE is_active=1') as $p) echo '<article class="card"><h3>'.e($p['title']).'</h3><p>'.e(ucfirst($p['package_type'])).' - '.e($p['hours']).' hours</p><strong>GBP '.e($p['price']).'</strong></article>';echo '</div>';}
             if($slug==='reviews') {foreach(Content::reviews() as $r) echo '<article class="card"><p>'.e($r['rating']).'/5</p><blockquote>'.e($r['testimonial']).'</blockquote><p>'.e($r['author']).'</p></article>';}
             if($slug==='instructors') {foreach(Api::users('instructor') as $i) echo '<article class="card"><h2>'.e($i['full_name']).'</h2><p>Type: '.e($i['instructor_type']).'</p><p>'.e($i['email']).'</p><p>'.e($i['phone']).'</p></article>';}
             if($slug==='contact') { $c=Api::publicSettings('contact'); foreach(['phone','email','address','whatsapp'] as $k) echo '<article class="card"><h2>'.ucfirst($k).'</h2><p>'.e($c[$k]).'</p></article>'; }
-            if($slug==='lessons') { echo '<div class="card-grid">'; foreach(['lessons_manual','lessons_automatic','lessons_intensive'] as $key) { echo '<article class="card">'; self::copy($key,3); echo '</article>'; } echo '</div>'; }
+            if($slug==='lessons') { echo '<div class="card-grid">'; foreach(['lessons_manual','lessons_automatic','lessons_intensive'] as $key) { echo '<article class="card">'; self::copy($key,3); if($key==='lessons_manual'||$key==='lessons_automatic') echo '<p><a href="/'.($key==='lessons_manual'?'manual':'automatic').'-driving-lessons-sheffield">Read our '.($key==='lessons_manual'?'manual':'automatic').' lesson guide</a></p>'; echo '</article>'; } echo '</div>'; }
             if($slug==='book') { self::copy('book_process',3); self::copy('book_request',3); }
             if($slug==='reviews') self::copy('reviews_submit',3);
             if(!$m['exists']) echo '<a href="/">Return home</a>'; echo '</section>';
