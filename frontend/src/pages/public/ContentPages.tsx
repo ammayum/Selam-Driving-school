@@ -1,6 +1,7 @@
 import { CmsText } from "./useCmsPage";
 import { CmsCopy } from "../../components/CmsCopy";
 import { FormEvent, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { api, resolveApiUrl } from "../../api/client";
 import { Seo } from "../../components/Seo";
@@ -128,6 +129,12 @@ export function LessonsPage() {
         <article className="card"><CmsCopy slug="lessons_automatic" title="Automatic" body="Focus faster on road awareness and decision making." /></article>
         <article className="card"><CmsCopy slug="lessons_intensive" title="Intensive" body="Compact schedules for learners targeting a quick test date." /></article>
       </div>
+      <nav aria-label="Explore lesson types" className="guide-related-links">
+        <Link to="/manual-driving-lessons-sheffield" className="btn btn-black">Explore Manual Driving Lessons</Link>
+        <Link to="/automatic-driving-lessons-sheffield" className="btn btn-black">Explore Automatic Driving Lessons</Link>
+        <Link to="/prices" className="btn btn-outline">Compare Lesson Prices</Link>
+      </nav>
+ 
     </section>
   );
 }
