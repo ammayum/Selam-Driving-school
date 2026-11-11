@@ -64,9 +64,30 @@ def run():
             assert any(x.get("@type") == "DrivingSchool" for x in meta["schema"]["@graph"])
             lessons = client.call("/lessons")
             assert "Manual &amp; Automatic Driving Lessons in Sheffield" in lessons
+            for kind in ("manual", "automatic"):
+                route = "/" + kind + "-driving-lessons-sheffield"
+                landing = client.call(route)
+                assert "<h1>" + kind.capitalize() + " Driving Lessons in Sheffield</h1>" in landing
+                assert 'application/ld+json' in landing
+                assert "Frequently asked questions" in landing
+                assert "lesson_type=" + kind in landing
+                assert "Request " + kind.capitalize() + " Lessons" in landing
+                page_meta = client.call("/api/seo?path=" + route)
+                assert page_meta["canonical"] == base + route
+                assert page_meta["robots"].startswith("index")
+                assert page_meta["guide"]["booking_type"] == kind
+                types = [node.get("@type") for node in page_meta["schema"]["@graph"]]
+                assert "LocalBusiness" in next(t for t in types if isinstance(t, list))
+                assert "Service" in types
+                assert "FAQPage" in types
+                assert "DrivingSchool" not in types
+            assert "/manual-driving-lessons-sheffield" in lessons
+            assert "/automatic-driving-lessons-sheffield" in lessons
             sitemap = client.call("/sitemap.xml")
             assert base + "/lessons" in sitemap
             assert base + "/prices" in sitemap
+            assert base + "/manual-driving-lessons-sheffield" in sitemap
+            assert base + "/automatic-driving-lessons-sheffield" in sitemap
             assert base + "/login" not in sitemap
             robots = client.call("/robots.txt")
             assert "Sitemap: " + base + "/sitemap.xml" in robots
