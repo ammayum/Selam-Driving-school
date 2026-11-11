@@ -174,7 +174,7 @@ export function PortalPage() {
           api.getConfigGroup("contact"),
           api.getDatabaseConnection(),
           api.getConfigGroup("cms_repeatables"),
-          api.getReviewTestimonials(),
+          api.getReviewTestimonials(undefined, true),
           api.listReviewTestimonialSubmissions(),
           api.listAdminUsers("instructor"),
           api.listAdminUsers("student"),
@@ -810,6 +810,21 @@ export function PortalPage() {
     );
   }
 
+  async function onUploadReviewTestimonialPhoto(index: number, file?: File) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setActionStatus("Choose a JPEG, PNG or WebP photo under 5 MB.");
+      return;
+    }
+    try {
+      const { url } = await api.uploadPhoto(file);
+      onChangeReviewTestimonial(index, "photo_url", url);
+      setActionStatus("Review photo uploaded. Save Testimonials to publish the change.");
+    } catch (error) {
+      setActionStatus(error instanceof Error ? error.message : "Photo upload failed");
+    }
+  }
+
   async function onSaveReviewTestimonials() {
     if (!isAdmin) return;
     try {
@@ -818,6 +833,7 @@ export function PortalPage() {
           author: item.author.trim(),
           testimonial: item.testimonial.trim(),
           rating: Math.max(1, Math.min(5, Number(item.rating || 1))),
+          photo_url: item.photo_url || null,
         }))
         .filter((item) => item.author && item.testimonial);
       await api.updateReviewTestimonials(sanitized);
@@ -834,7 +850,7 @@ export function PortalPage() {
       await api.moderateReviewTestimonialSubmission(submissionId, status);
       const [submissions, reviews] = await Promise.all([
         api.listReviewTestimonialSubmissions(),
-        api.getReviewTestimonials(),
+        api.getReviewTestimonials(undefined, true),
       ]);
       setReviewSubmissions(submissions || []);
       setReviewTestimonials(reviews.items || []);
@@ -1427,6 +1443,13 @@ export function PortalPage() {
                 </select>
                 <label>Testimonial</label>
                 <textarea rows={3} value={item.testimonial} onChange={(e) => onChangeReviewTestimonial(index, "testimonial", e.target.value)} />
+                <label>Review photo (optional)
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => { void onUploadReviewTestimonialPhoto(index, e.target.files?.[0]); e.target.value = ""; }} />
+                </label>
+                {item.photo_url ? <div className="media-preview">
+                  <img src={resolveApiUrl(item.photo_url)} alt={`Review from ${item.author}`} />
+                  <button type="button" className="mini-btn danger" onClick={() => onChangeReviewTestimonial(index, "photo_url", "")}>Remove photo</button>
+                </div> : null}
                 <button className="mini-btn danger" type="button" onClick={() => onRemoveReviewTestimonial(index)}>Remove</button>
               </div>
             ))}
@@ -1456,7 +1479,7 @@ export function PortalPage() {
                     <tr key={`submission-${item.id}`}>
                       <td>{item.author}</td>
                       <td>{item.rating}</td>
-                      <td>{item.testimonial}</td>
+                      <td>{item.testimonial}{item.photo_url ? <div className="media-preview"><img src={resolveApiUrl(item.photo_url)} alt={`Uploaded review photo by ${item.author}`} /></div> : null}</td>
                       <td>{item.status}</td>
                       <td>
                         {item.status === "pending" ? (
