@@ -88,7 +88,7 @@ def run():
                 "image_alt": None,
                 "is_published": False,
             }
-            guest.call("/api/blog/posts", "POST", draft, expected=403)
+            guest.call("/api/blog/posts", "POST", draft, expected=401)
             created = admin.call("/api/blog/posts", "POST", draft)
             assert created["is_published"] == 0
             guest.call("/api/blog/posts/sheffield-driving-tips", expected=404)
