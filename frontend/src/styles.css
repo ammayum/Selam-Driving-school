@@ -735,3 +735,17 @@ th {
   height: 16px;
   margin-right: 6px;
 }
+
+/* Search-friendly lesson guides: clear headings, direct booking calls and mobile links. */
+.lesson-guide { max-width: 1120px; }
+.lesson-guide .guide-intro { max-width: 800px; line-height: 1.75; }
+.guide-breadcrumbs { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; }
+.guide-related-links { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.guide-cards { margin: 1.5rem 0 2rem; }
+.guide-cards .card { height: 100%; }
+.guide-faqs details { margin-bottom: .75rem; }
+.guide-related { margin-top: 1.5rem; }
+@media (max-width: 640px) {
+  .guide-related-links { flex-direction: column; }
+  .guide-related-links .btn { width: 100%; text-align: center; }
+}

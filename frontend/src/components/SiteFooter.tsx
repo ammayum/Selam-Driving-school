@@ -1,4 +1,5 @@
 import { CmsText } from "../pages/public/useCmsPage";
+import { Link } from "react-router-dom";
 import { CmsCopy } from "./CmsCopy";
 import { usePublicContactSettings } from "../pages/public/usePublicContactSettings";
 import { usePublicAboutMediaSettings } from "../pages/public/usePublicAboutMediaSettings";
@@ -56,6 +57,13 @@ export function SiteFooter() {
               ))}
             </div>
           ) : null}
+        </div>
+        <div>
+          <h4>Driving Lessons in Sheffield</h4>
+          <p><Link to="/manual-driving-lessons-sheffield">Manual driving lessons</Link></p>
+          <p><Link to="/automatic-driving-lessons-sheffield">Automatic driving lessons</Link></p>
+          <p><Link to="/prices">Driving lesson prices</Link></p>
+          <p><Link to="/book">Request a lesson</Link></p>
         </div>
         <div>
           <h4><CmsText id="copy_site_contact">Contact</CmsText></h4>

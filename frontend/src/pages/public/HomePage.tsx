@@ -122,6 +122,16 @@ export function HomePage() {
       </section>
 
       <section className="section container">
+        <h2>Explore Manual and Automatic Driving Lessons in Sheffield</h2>
+        <p>Compare how manual and automatic lessons work, read answers to common learner questions, and check current lesson packages before sending a booking request.</p>
+        <nav aria-label="Explore Selam driving lessons" className="guide-related-links">
+          <Link to="/manual-driving-lessons-sheffield" className="btn btn-black">Manual Driving Lessons</Link>
+          <Link to="/automatic-driving-lessons-sheffield" className="btn btn-black">Automatic Driving Lessons</Link>
+          <Link to="/prices" className="btn btn-outline">Lesson Prices</Link>
+        </nav>
+      </section>
+
+      <section className="section container">
         <h2>{about?.title || "Why Choose Selam Driving School"}</h2>
         <p>{about?.body ?? "Structured teaching, supportive feedback, and reliable scheduling for learners across Sheffield."}</p>
         <div className="card-grid">

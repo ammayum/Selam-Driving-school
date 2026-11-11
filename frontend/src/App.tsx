@@ -1,5 +1,6 @@
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { DynamicPage } from "./pages/public/DynamicPage";
+import { LessonGuidePage } from "./pages/public/LessonGuidePage";
 import { Route, Routes } from "react-router-dom";
 import { CmsContentProvider } from "./pages/public/useCmsPage";
 
@@ -41,6 +42,8 @@ export default function App() {
       <Route path="/" element={<SiteFrame><HomePage /></SiteFrame>} />
       <Route path="/about" element={<SiteFrame><AboutPage /></SiteFrame>} />
       <Route path="/lessons" element={<SiteFrame><LessonsPage /></SiteFrame>} />
+      <Route path="/manual-driving-lessons-sheffield" element={<SiteFrame><LessonGuidePage lessonType="manual" /></SiteFrame>} />
+      <Route path="/automatic-driving-lessons-sheffield" element={<SiteFrame><LessonGuidePage lessonType="automatic" /></SiteFrame>} />
       <Route path="/prices" element={<SiteFrame><PricesPage /></SiteFrame>} />
       <Route path="/instructors" element={<SiteFrame><InstructorsPage /></SiteFrame>} />
       <Route path="/reviews" element={<SiteFrame><ReviewsPage /></SiteFrame>} />
