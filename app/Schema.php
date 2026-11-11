@@ -14,7 +14,8 @@ final class Schema {
         'invites'=>"code VARCHAR(64) NOT NULL UNIQUE, email VARCHAR(255) NOT NULL, phone VARCHAR(30), role VARCHAR(30) NOT NULL, instructor_id INTEGER, created_by_id INTEGER NOT NULL, status VARCHAR(30) NOT NULL DEFAULT 'pending', expires_at DATETIME NOT NULL, accepted_at DATETIME, created_at DATETIME NOT NULL, FOREIGN KEY(instructor_id) REFERENCES users(id), FOREIGN KEY(created_by_id) REFERENCES users(id)",
         'password_reset_tokens'=>"user_id INTEGER NOT NULL, token_hash VARCHAR(128) NOT NULL UNIQUE, expires_at DATETIME NOT NULL, used_at DATETIME, created_at DATETIME NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id)",
         'booking_assignment_tokens'=>"booking_id INTEGER NOT NULL, instructor_id INTEGER NOT NULL, token_hash VARCHAR(128) NOT NULL UNIQUE, expires_at DATETIME NOT NULL, used_at DATETIME, created_at DATETIME NOT NULL, FOREIGN KEY(booking_id) REFERENCES bookings(id), FOREIGN KEY(instructor_id) REFERENCES users(id)",
-        'review_testimonial_submissions'=>"author VARCHAR(120) NOT NULL, email VARCHAR(255), testimonial TEXT NOT NULL, rating INTEGER NOT NULL, status VARCHAR(30) NOT NULL DEFAULT 'pending', created_at DATETIME NOT NULL, reviewed_at DATETIME",
+        'review_testimonial_submissions'=>"author VARCHAR(120) NOT NULL, email VARCHAR(255), testimonial TEXT NOT NULL, rating INTEGER NOT NULL, photo_filename VARCHAR(100), status VARCHAR(30) NOT NULL DEFAULT 'pending', created_at DATETIME NOT NULL, reviewed_at DATETIME",
+        'blog_posts'=>"slug VARCHAR(120) NOT NULL UNIQUE, title VARCHAR(200) NOT NULL, excerpt VARCHAR(500) NOT NULL, body TEXT NOT NULL, cover_image_url VARCHAR(500), image_alt VARCHAR(200), is_published INTEGER NOT NULL DEFAULT 0, published_at DATETIME, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL",
         'activity_logs'=>"actor_role VARCHAR(30) NOT NULL, actor_id INTEGER, actor_username VARCHAR(80), action VARCHAR(120) NOT NULL, target_type VARCHAR(80) NOT NULL, target_id INTEGER, details TEXT, created_at DATETIME NOT NULL",
         'auth_versions'=>"user_id INTEGER NOT NULL UNIQUE, version INTEGER NOT NULL DEFAULT 1, FOREIGN KEY(user_id) REFERENCES users(id)",
         'instructor_events'=>"instructor_id INTEGER NOT NULL, title VARCHAR(160) NOT NULL, description TEXT, location VARCHAR(255), event_type VARCHAR(30) NOT NULL, start_time DATETIME NOT NULL, end_time DATETIME NOT NULL, status VARCHAR(30) NOT NULL DEFAULT 'scheduled', notify_email INTEGER NOT NULL DEFAULT 0, reminder_minutes INTEGER NOT NULL DEFAULT 30, revision INTEGER NOT NULL DEFAULT 1, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, FOREIGN KEY(instructor_id) REFERENCES users(id)",
@@ -46,6 +47,9 @@ final class Schema {
         foreach(['must_change_password'=>'INTEGER NOT NULL DEFAULT 0','temporary_password_expires_at'=>'DATETIME NULL'] as $name=>$type) {
             if(!in_array($name,$names,true)) $pdo->exec('ALTER TABLE users ADD COLUMN '.$name.' '.$type);
         }
+        $reviewColumns=$pdo->query($sqlite?'PRAGMA table_info(review_testimonial_submissions)':'SHOW COLUMNS FROM review_testimonial_submissions')->fetchAll(PDO::FETCH_ASSOC);
+        $reviewNames=array_column($reviewColumns,$sqlite?'name':'Field');
+        if(!in_array('photo_filename',$reviewNames,true)) $pdo->exec('ALTER TABLE review_testimonial_submissions ADD COLUMN photo_filename VARCHAR(100) NULL');
         if(!$pdo->query('SELECT id FROM app_locks WHERE id=1')->fetch()) $pdo->exec('INSERT INTO app_locks(id,value) VALUES (1,0)');
     }
 }
