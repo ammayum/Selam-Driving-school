@@ -76,7 +76,14 @@ final class Content {
         }
         if($method==='GET'&&$path==='/home/repeatables') return self::repeatables();
         if($path==='/reviews/testimonials') {
-            if($method==='GET') { $rating=Http::integer($_GET['min_rating']??1,1,5,'min_rating'); return ['items'=>array_values(array_filter(self::reviews(),fn($r)=>(int)($r['rating']??0)>=$rating))]; }
+            if($method==='GET') {
+                if(($_GET['managed']??'')==='1') {
+                    Auth::requireRoles(['admin']);
+                    return ['items'=>self::jsonList(Config::group('cms_repeatables')['review_testimonials']??'[]')];
+                }
+                $rating=Http::integer($_GET['min_rating']??1,1,5,'min_rating');
+                return ['items'=>array_values(array_filter(self::reviews(),fn($r)=>(int)($r['rating']??0)>=$rating))];
+            }
             if($method==='PUT') {Auth::requireRoles(['admin']); if(!is_array($b['items']??null)||count($b['items'])>500) Http::fail(422,'Invalid testimonials'); $rows=[]; foreach($b['items'] as $r) $rows[]=self::review($r,true); Config::save('cms_repeatables',['review_testimonials'=>json_encode($rows)]); return ['items'=>self::reviews()];}
         }
         if($method==='POST'&&$path==='/reviews/testimonials/submit') {
