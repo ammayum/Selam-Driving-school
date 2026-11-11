@@ -1,0 +1,37 @@
+.user-management { min-width: 0; }
+.users-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.users-heading h2 { margin: 4px 0 8px; color: var(--red-deep); }
+.user-management .eyebrow { color: var(--red); }
+.users-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin: 24px 0; }
+.users-summary article { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(130deg,#fffdf8,#f6eddc); padding: 20px; }
+.users-summary span { display: block; font-size: .85rem; }
+.users-summary strong { display: block; font-size: 2rem; color: var(--red-deep); margin-top: 6px; }
+.users-filters { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 14px; align-items: end; }
+.users-filters label { font-size: .8rem; font-weight: 700; min-width: 0; }
+.users-filters input, .users-filters select { margin-top: 7px; min-width: 0; }
+.users-directory td { vertical-align: middle; }
+.users-directory td small { display: block; color: #665c5d; margin-top: 5px; }
+.user-actions { display: flex; flex-wrap: wrap; gap: 5px; min-width: 170px; }
+.user-actions button { margin: 0; }
+.user-state { display: inline-block; border-radius: 20px; padding: 5px 10px; font-size: .75rem; background: #e5eee3; color: #244223; }
+.user-state.frozen { background: #fff0c4; color: #604609; }
+.user-state.deleted { background: #f6dfe4; color: #771a2e; }
+.users-pagination { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 18px; font-size: .8rem; }
+.users-note { font-size: .8rem; color: #655a5c; }
+.user-dialog { width: min(540px,calc(100vw - 32px)); max-height: 90dvh; overflow: auto; border: 1px solid var(--line); border-radius: 18px; padding: 24px; color: var(--ink); background: #fffdf8; }
+.user-dialog::backdrop { background: #28131db3; }
+.user-dialog fieldset { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+.user-dialog input, .user-dialog select { margin-top: 5px; }
+.user-dialog button:focus-visible, .user-management button:focus-visible { outline: 3px solid #186bb1; outline-offset: 3px; }
+.user-management button:disabled { opacity: .5; cursor: not-allowed; }
+@media(max-width:700px) { .users-filters { grid-template-columns: repeat(2,minmax(0,1fr)); } .users-filters label:first-child { grid-column: 1 / -1; } .users-heading { align-items: start; flex-wrap: wrap; } .users-summary { gap: 8px; } .users-summary article { padding: 12px 8px; } .users-summary span { font-size: .65rem; } .user-dialog { padding: 18px; } }
+@media(max-width:700px) {
+  .users-directory table { display: block; min-width: 0; }
+  .users-directory thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .users-directory tbody { display: block; }
+  .users-directory tbody tr { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .users-directory tbody td { display: block; padding: 6px 0; border: 0; overflow-wrap: anywhere; }
+  .users-directory tbody td:first-child, .users-directory tbody td:nth-child(4), .users-directory tbody td:last-child { grid-column: 1 / -1; }
+  .users-directory .user-actions { min-width: 0; gap: 8px; }
+  .users-directory .user-actions button { padding: 9px 11px; }
+}

@@ -1,0 +1,16 @@
+{
+  "cms_pages": [
+    {
+      "id": 1,
+      "slug": "home",
+      "title": "CMS Home Title",
+      "body": "Managed from dashboard.",
+      "meta_title": "Updated SEO",
+      "meta_description": "Updated SEO description",
+      "is_published": 1,
+      "updated_at": "2026-02-27 18:03:26.503140"
+    }
+  ],
+  "lesson_packages": [],
+  "system_configs": []
+}

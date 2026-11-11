@@ -1,0 +1,7 @@
+{
+  "name": "selam/driving-school-php",
+  "description": "Standalone PHP implementation of Selam Driving School",
+  "type": "project",
+  "require": {"php": ">=8.2", "ext-pdo": "*", "ext-openssl": "*", "ext-mbstring": "*", "ext-fileinfo": "*", "phpmailer/phpmailer": "^6.10"},
+  "config": {"sort-packages": true, "allow-plugins": false}
+}

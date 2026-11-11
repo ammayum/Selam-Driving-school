@@ -1,0 +1,13 @@
+.env
+/config/secrets.json
+/storage/*
+!/storage/.gitkeep
+/vendor/
+/frontend/node_modules/
+/tests/runtime/
+/config/secrets.lock
+/bin/composer.phar
+
+/releases/
+**/__pycache__/
+/frontend/*.tsbuildinfo

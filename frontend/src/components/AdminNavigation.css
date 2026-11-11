@@ -1,0 +1,18 @@
+.admin-layout { display:grid; grid-template-columns:210px minmax(0,1fr); gap:24px; align-items:start; }
+.admin-content { min-width:0; }
+.admin-navigation { display:grid; gap:4px; padding:18px; background:#f7f4eb; border:1px solid #ddd6c4; border-radius:16px; position:sticky; top:90px; }
+.admin-navigation a { padding:10px 12px; border-radius:8px; color:#26251e; text-decoration:none; }
+.admin-navigation a.active { background:#252820; color:#fff; font-weight:700; }
+.admin-navigation .eyebrow { color:#78601d; }
+.portal-actions .btn-outline { color:#26251e; border-color:#8d846f; }
+.admin-navigation a:focus-visible { outline:3px solid #a77e22; outline-offset:2px; }
+.admin-content .cms-layout { grid-template-columns:minmax(0,1fr); }
+.cms-directory { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:8px; margin:16px 0; }
+.cms-directory a { padding:12px; border:1px solid #ddd6c4; border-radius:8px; text-decoration:none; color:inherit; }
+.cms-directory a.active { background:#f7f4eb; border-color:#a77e22; font-weight:700; }
+.cms-tools { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; }
+@media(max-width:850px) {
+  .admin-layout { grid-template-columns:minmax(0,1fr); }
+  .admin-navigation { position:static; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .admin-navigation .eyebrow { grid-column:1/-1; }
+}

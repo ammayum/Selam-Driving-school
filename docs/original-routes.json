@@ -1,0 +1,386 @@
+[
+  {
+    "method": "GET",
+    "source_path": "/activity-logs",
+    "php_path": "/api/activity-logs",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/admin/config/{group}",
+    "php_path": "/api/admin/config/{group}",
+    "note": "Ported"
+  },
+  {
+    "method": "PUT",
+    "source_path": "/admin/config/{group}",
+    "php_path": "/api/admin/config/{group}",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/admin/database/connection",
+    "php_path": "/api/admin/database/connection",
+    "note": "Ported"
+  },
+  {
+    "method": "PUT",
+    "source_path": "/admin/database/connection",
+    "php_path": "/api/admin/database/connection",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/admin/database/test",
+    "php_path": "/api/admin/database/test",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/admin/database/migrate",
+    "php_path": "/api/admin/database/migrate",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/admin/database/apply",
+    "php_path": "/api/admin/database/apply",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/admin/users",
+    "php_path": "/api/admin/users",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/admin/users",
+    "php_path": "/api/admin/users",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/admin/users/preferences",
+    "php_path": "/api/admin/users/preferences",
+    "note": "Ported"
+  },
+  {
+    "method": "PATCH",
+    "source_path": "/admin/users/preferences/{user_id}",
+    "php_path": "/api/admin/users/preferences/{user_id}",
+    "note": "Ported"
+  },
+  {
+    "method": "PUT",
+    "source_path": "/admin/users/{user_id}",
+    "php_path": "/api/admin/users/{user_id}",
+    "note": "Ported"
+  },
+  {
+    "method": "PATCH",
+    "source_path": "/admin/users/{user_id}/freeze",
+    "php_path": "/api/admin/users/{user_id}/freeze",
+    "note": "Ported"
+  },
+  {
+    "method": "DELETE",
+    "source_path": "/admin/users/{user_id}",
+    "php_path": "/api/admin/users/{user_id}",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/auth/signup",
+    "php_path": "/api/auth/signup",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/auth/check-username",
+    "php_path": "/api/auth/check-username",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/auth/session",
+    "php_path": "/api/auth/session",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/auth/login",
+    "php_path": "/api/auth/login",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/auth/refresh",
+    "php_path": "/api/auth/refresh",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/auth/logout",
+    "php_path": "/api/auth/logout",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/auth/forgot-password/request",
+    "php_path": "/api/auth/forgot-password/request",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/auth/forgot-password/confirm",
+    "php_path": "/api/auth/forgot-password/confirm",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/bookings",
+    "php_path": "/api/bookings",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/bookings",
+    "php_path": "/api/bookings",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/bookings/my",
+    "php_path": "/api/bookings/my",
+    "note": "Ported"
+  },
+  {
+    "method": "PATCH",
+    "source_path": "/bookings/{booking_id}",
+    "php_path": "/api/bookings/{booking_id}",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/bookings/{booking_id}/request-payment",
+    "php_path": "/api/bookings/{booking_id}/request-payment",
+    "note": "Ported"
+  },
+  {
+    "method": "PATCH",
+    "source_path": "/bookings/{booking_id}/payment",
+    "php_path": "/api/bookings/{booking_id}/payment",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/bookings/{booking_id}/accept-by-email",
+    "php_path": "/api/bookings/{booking_id}/accept-by-email",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/bookings/{booking_id}/accept-by-email",
+    "php_path": "/api/bookings/{booking_id}/accept-by-email",
+    "note": "Authenticated POST required"
+  },
+  {
+    "method": "GET",
+    "source_path": "/bookings/{booking_id}/assign-by-token",
+    "php_path": "/api/bookings/{booking_id}/assign-by-token",
+    "note": "Confirmation POST required"
+  },
+  {
+    "method": "GET",
+    "source_path": "/bookings/availability",
+    "php_path": "/api/bookings/availability",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/bookings/stats",
+    "php_path": "/api/bookings/stats",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/cms/pages/home/repeatables",
+    "php_path": "/api/cms/pages/home/repeatables",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/cms/pages/reviews/testimonials",
+    "php_path": "/api/cms/pages/reviews/testimonials",
+    "note": "Ported"
+  },
+  {
+    "method": "PUT",
+    "source_path": "/cms/pages/reviews/testimonials",
+    "php_path": "/api/cms/pages/reviews/testimonials",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/cms/pages/reviews/testimonials/submit",
+    "php_path": "/api/cms/pages/reviews/testimonials/submit",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/cms/pages/reviews/testimonials/submissions",
+    "php_path": "/api/cms/pages/reviews/testimonials/submissions",
+    "note": "Ported"
+  },
+  {
+    "method": "PATCH",
+    "source_path": "/cms/pages/reviews/testimonials/submissions/{submission_id}",
+    "php_path": "/api/cms/pages/reviews/testimonials/submissions/{submission_id}",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/cms/pages",
+    "php_path": "/api/cms/pages",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/cms/pages",
+    "php_path": "/api/cms/pages",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/cms/pages/{slug}",
+    "php_path": "/api/cms/pages/{slug}",
+    "note": "Ported"
+  },
+  {
+    "method": "PUT",
+    "source_path": "/cms/pages/{slug}",
+    "php_path": "/api/cms/pages/{slug}",
+    "note": "Ported"
+  },
+  {
+    "method": "PATCH",
+    "source_path": "/cms/pages/{slug}",
+    "php_path": "/api/cms/pages/{slug}",
+    "note": "Ported"
+  },
+  {
+    "method": "PATCH",
+    "source_path": "/cms/pages/{slug}/seo",
+    "php_path": "/api/cms/pages/{slug}/seo",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/dashboard",
+    "php_path": "/api/dashboard",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/health",
+    "php_path": "/api/health",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/invites",
+    "php_path": "/api/invites",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/invites",
+    "php_path": "/api/invites",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/invites/accept",
+    "php_path": "/api/invites/accept",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/media/upload-photo",
+    "php_path": "/api/media/upload-photo",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/notifications",
+    "php_path": "/api/notifications",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/notifications",
+    "php_path": "/api/notifications",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/packages",
+    "php_path": "/api/packages",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/packages",
+    "php_path": "/api/packages",
+    "note": "Ported"
+  },
+  {
+    "method": "PUT",
+    "source_path": "/packages/{package_id}",
+    "php_path": "/api/packages/{package_id}",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/public/settings/video",
+    "php_path": "/api/public/settings/video",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/public/settings/contact",
+    "php_path": "/api/public/settings/contact",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/public/settings/about-media",
+    "php_path": "/api/public/settings/about-media",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/students/{student_id}/progress",
+    "php_path": "/api/students/{student_id}/progress",
+    "note": "Ported"
+  },
+  {
+    "method": "POST",
+    "source_path": "/users",
+    "php_path": "/api/users",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/users/instructors",
+    "php_path": "/api/users/instructors",
+    "note": "Ported"
+  },
+  {
+    "method": "GET",
+    "source_path": "/users/students",
+    "php_path": "/api/users/students",
+    "note": "Ported"
+  }
+]
